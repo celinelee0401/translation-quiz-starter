@@ -1,0 +1,14 @@
+{
+  // Cloudflare Workers 部署設定。name 會成為網址的一部分：
+  //   https://<name>.<你的帳號>.workers.dev
+  "name": "translation-quiz",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "main": "vinext/server/fetch-handler",
+  // 非機密設定可以寫在這裡；金鑰一律用 `npx wrangler secret put <名稱>` 設定。
+  "vars": {
+    "SCHOOL_YEAR": "115",
+    "STUDENT_LOGIN_MODE": "pin",
+    "AI_PROVIDER": "none"
+  }
+}
