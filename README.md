@@ -1,8 +1,16 @@
 # 句子翻譯線上測驗（教師公版）
 
-給國中／高中英文老師用的「中翻英句子翻譯」線上測驗系統。老師建立題目與評分細則、設定各班開放時段，學生用班級＋座號（可加 PIN）登入作答；系統用固定規則與（可選的）AI 提出分數建議，**最後成績一定由老師確認**。
+給國中／高中英文老師用的「中翻英句子翻譯」線上測驗網站。老師建立題目與評分細則、設定各班開放時段，學生用班級＋座號＋PIN 登入作答；系統用固定規則與（可選的）AI 提出分數建議，**最後成績一定由老師確認**。
 
-> 不熟程式也沒關係：把 [`PROMPT.md`](PROMPT.md) 整份貼給你的 AI 助理（ChatGPT、Claude、Gemini 等），它會一步一步問你選項、幫你設定與部署。
+全部使用免費方案（GitHub、Supabase、Cloudflare），**不用安裝軟體、不用打指令**。
+
+## 🚀 開始架設
+
+**第一次架設，請照 👉 [新手架設指南](docs/新手架設指南.md) 一步一步做**（約 40–60 分鐘）。指南會先帶你建好資料庫，再按下面這顆按鈕：
+
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/celinelee0401/translation-quiz-starter)
+
+想請 AI 助理陪你一起做？把 [`PROMPT.md`](PROMPT.md) 整份貼給它（ChatGPT、Claude、Gemini 都可以）。
 
 ## 固定的核心（不能關）
 
@@ -12,16 +20,21 @@
 - **時間由伺服器判斷**：未開放、已截止、不是目標班級都不能作答；正式測驗不會提前露出答案。
 - **已考完只封存不刪除**；撤銷發布只限還沒有人作答。
 
-## 老師可以自己選
+## 老師可以自己選（部署時填，之後可在 Cloudflare 修改）
 
-| 項目 | 選項 | 設定位置 |
+| 變數 | 用途 | 範例 |
 |---|---|---|
-| 學生登入 | `pin`：班級＋座號＋六位數 PIN（正式成績用）／`seat`：只要班級＋座號（練習用，任何人都能冒用座號） | `STUDENT_LOGIN_MODE` |
-| AI 批改建議 | `none`：關閉，只用固定規則＋老師批改／`openai`：OpenAI，金鑰與費用由老師自己的帳號支付 | `AI_PROVIDER`、`OPENAI_API_KEY`、`OPENAI_MODEL` |
-| 班級與年級 | 任意班級代碼、1–12 年級 | [`school.config.ts`](school.config.ts) |
-| 學年、時區 | 例如 `115`、`Asia/Taipei` | `SCHOOL_YEAR`、`school.config.ts` |
-| 資料庫 | Supabase（免費方案即可） | `SUPABASE_URL`、`SUPABASE_SECRET_KEY` |
-| 部署 | Cloudflare Workers（免費方案即可） | [`wrangler.jsonc`](wrangler.jsonc) |
+| `SCHOOL_NAME` | 學校名稱 | `光明國中` |
+| `SCHOOL_CLASSES` | 班級與年級（1–12） | `801:8, 802:8, 901:9` |
+| `SCHOOL_YEAR` | 學年 | `115` |
+| `SCHOOL_TIMEZONE` | 時區 | `Asia/Taipei` |
+| `STUDENT_LOGIN_MODE` | `pin`：班級＋座號＋PIN（正式成績用）／`seat`：只要班級＋座號（練習用，可被冒用座號） | `pin` |
+| `AI_PROVIDER` | `none`：不用 AI／`openai`：OpenAI 給分數建議（費用由老師自己的帳號支付） | `none` |
+| `OPENAI_MODEL` | OpenAI 模型名稱 | `gpt-5.6-terra` |
+
+機密（部署時另外詢問，不會出現在程式裡）：`SUPABASE_URL`、`SUPABASE_SECRET_KEY`、`SETUP_CODE`（自己想的設定碼，用來在 `/setup` 設定教師通行碼）、`OPENAI_API_KEY`（不用 AI 填 `none`）。`TRANSLATION_SESSION_SECRET` 可選；沒填時由 Supabase secret key 衍生。
+
+部署後打開 **`你的網址/setup`**，網站會逐項檢查設定，並告訴你下一步。
 
 ## 輸入建議能做到與做不到
 
@@ -29,45 +42,30 @@
 - 做不到：學生切到中文輸入法時，選字列是系統畫的，網頁關不掉；部分 iPad 版本不完全遵守設定。系統會提醒學生切回英文鍵盤。
 - 要完全鎖住，需要學校的裝置管理（例如 Jamf、Google 管理控制台）。
 
-## 安裝步驟（手動版）
+## 安全設計
 
-需要：Node.js 22.13 以上、一個 [Supabase](https://supabase.com) 帳號、一個 [Cloudflare](https://cloudflare.com) 帳號。
-
-1. **安裝套件**：`npm install`
-2. **建立資料庫**：在 Supabase 建一個新專案，到 SQL Editor 依檔名順序執行 `supabase/migrations/` 裡的每個 `.sql` 檔。
-3. **設定教師通行碼**：`npm run teacher-code`，輸入你要的通行碼，把印出的 SQL 貼到 SQL Editor 執行。
-4. **改學校設定**：編輯 `school.config.ts`（學校名稱、班級、年級、時區）與 `wrangler.jsonc` 的 `vars`（學年、登入方式、AI）。
-5. **本機試跑**：複製 `.dev.vars.example` 成 `.dev.vars` 並填入，執行 `npm run dev`，開啟畫面上顯示的網址。
-6. **部署**：
-   ```bash
-   npx wrangler login
-   npx wrangler secret put TRANSLATION_SESSION_SECRET
-   npx wrangler secret put SUPABASE_URL
-   npx wrangler secret put SUPABASE_SECRET_KEY
-   npx wrangler secret put OPENAI_API_KEY   # 只有使用 AI 時才需要
-   npm run deploy
-   ```
-7. **匯入學生**：以教師通行碼登入首頁 →「學生名冊與 PIN」，每行貼上 `班級,座號[,PIN]`。PIN 留空會自動產生，**只顯示一次**，請當場列印或複製發給學生。
-8. **建立第一份測驗**：首頁「新增／匯入測驗」，可直接匯入 `examples/demo-quiz.json` 試一次。設定班級時段並發布後，學生入口是 `/quiz?quiz=<測驗代碼>&version=1`。
-
-## 檢查
-
-- `npm test`：單元與合約測試。
-- `npm run check:db`：在記憶體裡的 Postgres 跑一次所有 migration，並驗證登入鎖定、防重複繳交、改分稽核與權限（不連任何外部資料庫）。
-- `npm run build`：確認可以建置。
-
-## 安全提醒
-
-- `SUPABASE_SECRET_KEY`、`OPENAI_API_KEY`、`TRANSLATION_SESSION_SECRET` 只能放在伺服器端（Cloudflare secret 或 `.dev.vars`），不要寫進程式或上傳到 GitHub。
 - 資料表全部關閉瀏覽器直接存取，只有伺服器用 secret key 讀寫。
-- 學生 PIN 只以 bcrypt 雜湊保存；連續輸錯 5 次會鎖 10 分鐘。老師可在名冊頁重設 PIN，舊的登入立即失效。
-- 不要用真實學生資料做測試；請先用假的班級與座號試跑。
+- 學生 PIN 只以 bcrypt 雜湊保存；連續輸錯 5 次鎖 10 分鐘。老師可在名冊頁重設 PIN，舊的登入立即失效。
+- 只存班級與座號，不存學生姓名。
+- 不要用真實學生資料做測試；請先用假座號（例如 90–99）試跑。
 
-## 專案結構
+## 給會寫程式的人
 
-- `app/`：頁面與 API；`components/`：畫面元件；`lib/`：評分規則與共用邏輯；`lib/server/`：所有資料庫與權限檢查。
-- `supabase/migrations/`：資料庫結構；`tests/`：測試；`scripts/`：教師通行碼與資料庫檢查工具。
-- 領域規則見 [`CONTEXT.md`](CONTEXT.md)；給 AI 助理的工作規則見 [`AGENTS.md`](AGENTS.md)。
+需要 Node.js 22.13 以上。
+
+```bash
+npm install
+cp .dev.vars.example .dev.vars   # 填入 Supabase 等設定
+npm run dev                      # 本機試跑
+npm test                         # 單元與合約測試
+npm run check:db                 # 在記憶體 Postgres 跑 supabase/setup.sql 並驗證登入、交卷、改分、權限
+npm run build && npm run deploy  # 手動部署（需先 npx wrangler login，機密用 npx wrangler secret put）
+```
+
+- 資料庫變更：在 `supabase/migrations/` 新增檔案，再執行 `npm run build:sql` 更新 `supabase/setup.sql`（測試會檢查兩者一致）。
+- `app/`：頁面與 API；`components/`：畫面元件；`lib/`：評分規則、學校設定；`lib/server/`：所有資料庫與權限檢查。
+- 領域規則見 [`CONTEXT.md`](CONTEXT.md)；給 AI 助理的開發規則見 [`AGENTS.md`](AGENTS.md)。
+- `school.config.ts` 只是預設值，部署變數會覆蓋它。
 
 ## 授權與內容
 

@@ -2,12 +2,8 @@
 
 import { useState } from 'react';
 import type { TargetPhase } from '@/lib/quiz-management';
-import { schoolTimeZone } from '@/lib/school-time';
-
-const toTaipeiLocal = (iso: string) => new Intl.DateTimeFormat('sv-SE', {
-  timeZone: schoolTimeZone, year: 'numeric', month: '2-digit', day: '2-digit',
-  hour: '2-digit', minute: '2-digit', hour12: false,
-}).format(new Date(iso)).replace(' ', 'T');
+import { useSchoolSettings } from '@/components/school-settings-provider';
+import { toSchoolLocal } from '@/lib/school-time';
 
 export function AdjustClassTarget({ quizId, quizVersion, classCode, phase, opensAt, closesAt, attemptLimit, showsAnswers }: {
   quizId: string; quizVersion: number; classCode: string; phase: Exclude<TargetPhase, 'ended'>;
@@ -15,6 +11,8 @@ export function AdjustClassTarget({ quizId, quizVersion, classCode, phase, opens
   /** 交卷後本班時段內會看到參考答案（正式測驗即時回饋或立即回饋）。 */
   showsAnswers: boolean;
 }) {
+  const { timeZone } = useSchoolSettings();
+  const toTaipeiLocal = (iso: string) => toSchoolLocal(new Date(iso), timeZone);
   const [opensAtLocal, setOpensAtLocal] = useState(() => toTaipeiLocal(opensAt));
   const [closesAtLocal, setClosesAtLocal] = useState(() => toTaipeiLocal(closesAt));
   const [grace, setGrace] = useState(0);

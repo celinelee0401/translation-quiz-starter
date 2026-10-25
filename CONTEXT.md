@@ -1,6 +1,6 @@
 # 專案脈絡
 
-這是跨 Agent 的穩定領域說明。學校的實際設定在 `school.config.ts` 與部署環境變數，不在本文件。
+這是跨 Agent 的穩定領域說明。學校的實際設定在部署變數（SCHOOL_NAME、SCHOOL_CLASSES、SCHOOL_YEAR、SCHOOL_TIMEZONE；預設值在 `school.config.ts`），不在本文件。
 
 ## 目標與使用者
 
@@ -11,13 +11,13 @@
 1. **身分**：學生名冊（`students`、`enrollments`）存在本系統自己的 Supabase。登入方式由 `STUDENT_LOGIN_MODE` 決定：`pin`（班級＋座號＋PIN，資料庫比對 bcrypt 雜湊，5 次錯誤鎖 10 分鐘）或 `seat`（只有班級＋座號）。登入後由伺服器簽發短效 session；每次請求都回資料庫確認名冊與 PIN 版本。前端班級選擇或 URL 參數不能代替授權。
 2. **測驗資料**：Supabase 保存測驗、題目、評分細則、班級時段、原始作答、覆核與稽核資料。`lib/server/` 是外部資料與權限的唯一程式邊界；所有資料表對瀏覽器角色關閉。
 3. **學生入口**：`/quiz` 載入指定測驗；後端檢查發布狀態、年級、班級、時段、作答次數與身分。學生作答時不應取得參考答案或提示。
-4. **教師入口**：首頁工作台、批改頁、名冊頁需教師通行碼登入（`teacher_access_settings`）。所有教師 API 都在後端授權，不能只靠隱藏按鈕。
+4. **教師入口**：首頁工作台、批改頁、名冊頁需教師通行碼登入（`teacher_access_settings`）。通行碼在 `/setup` 以部署時設定的 SETUP_CODE 設定或重設；`/setup` 只顯示設定狀態，不顯示任何秘密。所有教師 API 都在後端授權，不能只靠隱藏按鈕。
 5. **AI**：`AI_PROVIDER` 為 `none` 或 `openai`（`lib/server/ai-provider.ts`）。AI 只寫入建議分數與理由，不寫入最終分數。
 6. **Dashboard feed**：公開 `/api/dashboard-feed` 只在各班當下可見時段提供測驗標題、時間與入口，不是分數或身分的權威來源。
 
 ## 不可破壞的規則
 
-- 班級與年級以 `school.config.ts` 為準；年級分流與時間以伺服器判斷。
+- 班級與年級以 SCHOOL_CLASSES（未設定時用 `school.config.ts`）為準；年級分流與時間以伺服器判斷。
 - 原始答案不得因自動評分、教師覆核或重試而被覆寫；提交需有冪等保護。
 - 正式評分需要可追溯的規則版本與教師改分紀錄。AI 建議不能靜默取代教師的最終裁量。
 - 回饋是否可見依測驗設定及該班時段判定；正式測驗不得提前公開答案。
@@ -29,4 +29,4 @@
 
 ## 主要資料
 
-資料庫結構以 `supabase/migrations/` 為準，`npm run check:db` 可在記憶體資料庫驗證。
+資料庫結構以 `supabase/migrations/` 為準；`supabase/setup.sql` 是由 `npm run build:sql` 合併產生、給老師一次貼上的版本。`npm run check:db` 可在記憶體資料庫驗證。

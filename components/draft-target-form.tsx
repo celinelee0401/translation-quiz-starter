@@ -2,14 +2,15 @@
 
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
-import { classCodesForGrade } from '@/lib/public-quiz-data';
+import { useSchoolSettings } from '@/components/school-settings-provider';
+import { classCodesForGrade } from '@/lib/school-settings';
 
 export function DraftTargetForm({ quizId, quizVersion, grade, mode = 'draft', existingClasses = [] }: {
   quizId: string; quizVersion: number; grade: number;
   mode?: 'draft' | 'published'; existingClasses?: string[];
 }) {
   const router = useRouter();
-  const classes = classCodesForGrade(grade)
+  const classes = classCodesForGrade(useSchoolSettings(), grade)
     .filter(code => mode === 'draft' || !existingClasses.includes(code));
   const [classCode, setClassCode] = useState(classes[0] ?? '');
   const [opensAtLocal, setOpensAtLocal] = useState('');

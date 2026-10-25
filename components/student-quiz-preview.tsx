@@ -1,8 +1,8 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { classCodesForQuizId } from '@/lib/public-quiz-data';
-import { schoolTimeZone } from '@/lib/school-time';
+import { useSchoolSettings } from '@/components/school-settings-provider';
+import { classCodesForQuizId } from '@/lib/school-settings';
 
 type Phase = 'checking' | 'login' | 'quiz' | 'complete';
 type PublicSession = {
@@ -64,7 +64,9 @@ export function StudentQuizPreview({
   loginMode?: 'seat' | 'pin';
 }) {
   const usesPin = loginMode === 'pin';
-  const classOptions = useMemo(() => classCodesForQuizId(quizId), [quizId]);
+  const schoolSettings = useSchoolSettings();
+  const schoolTimeZone = schoolSettings.timeZone;
+  const classOptions = useMemo(() => classCodesForQuizId(schoolSettings, quizId), [schoolSettings, quizId]);
   const [phase, setPhase] = useState<Phase>(autoPreview ? 'quiz' : quizId ? 'checking' : 'login');
   const [classCode, setClassCode] = useState(classOptions[0] ?? '');
   const [seatNumber, setSeatNumber] = useState('');

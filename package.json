@@ -12,9 +12,9 @@
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "lint": "oxlint",
     "format": "oxfmt",
-    "deploy": "vinext build && wrangler deploy --config dist/server/wrangler.json",
-    "teacher-code": "node --experimental-strip-types scripts/teacher-code-sql.ts",
-    "check:db": "node scripts/check-migrations.mjs"
+    "deploy": "wrangler deploy",
+    "check:db": "node scripts/check-migrations.mjs",
+    "build:sql": "node scripts/build-setup-sql.mjs"
   },
   "dependencies": {
     "@base-ui/react": "1.7.0",
@@ -55,5 +55,42 @@
     "vite": "8.0.13",
     "wrangler": "4.92.0"
   },
-  "type": "module"
+  "type": "module",
+  "cloudflare": {
+    "bindings": {
+      "SCHOOL_NAME": {
+        "description": "學校名稱，會顯示在網頁標題。"
+      },
+      "SCHOOL_CLASSES": {
+        "description": "開放使用的班級與年級，格式 `班級:年級`，用逗號分隔。例如 `801:8, 802:8, 901:9`。"
+      },
+      "SCHOOL_YEAR": {
+        "description": "目前學年，3–4 位數字，例如 `115`。"
+      },
+      "SCHOOL_TIMEZONE": {
+        "description": "時區。台灣填 `Asia/Taipei`。"
+      },
+      "STUDENT_LOGIN_MODE": {
+        "description": "學生登入方式：`pin`（班級＋座號＋PIN，**正式成績請選這個**）或 `seat`（只要班級＋座號，任何人都能冒用座號，只適合練習）。"
+      },
+      "AI_PROVIDER": {
+        "description": "AI 批改建議：`none`（不用）或 `openai`（需要 OpenAI 金鑰，會產生費用）。"
+      },
+      "OPENAI_MODEL": {
+        "description": "使用 OpenAI 時的模型名稱。不用 AI 可以不管。"
+      },
+      "SUPABASE_URL": {
+        "description": "Supabase 專案網址：Supabase → Project Settings → Data API → **Project URL**（`https://` 開頭）。"
+      },
+      "SUPABASE_SECRET_KEY": {
+        "description": "Supabase 的 secret key：Supabase → Project Settings → API Keys → Secret keys，按 Reveal 後複製（`sb_secret_` 開頭）。**不要**用 publishable key。"
+      },
+      "SETUP_CODE": {
+        "description": "自己想一組至少 8 個字元的「設定碼」並記下來。部署完成後到網站的 `/setup` 頁面，用它來設定教師通行碼。"
+      },
+      "OPENAI_API_KEY": {
+        "description": "不用 AI 就填 `none`。要用 AI 時，貼上 OpenAI 的 API key（`sk-` 開頭）。"
+      }
+    }
+  }
 }

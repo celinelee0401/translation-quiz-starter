@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { DraftTargetForm } from '@/components/draft-target-form';
 import { ConfirmQuizContent } from '@/components/confirm-quiz-content';
 import { PublishQuiz } from '@/components/publish-quiz';
+import { StudentLink } from '@/components/student-link';
 import { TeacherLogout } from '@/components/teacher-logout';
 import { ReopenClassTarget } from '@/components/reopen-class-target';
 import { AdjustClassTarget } from '@/components/adjust-class-target';
@@ -19,8 +20,8 @@ import type { AutoFinalizeSetting } from '@/lib/server/auto-finalize';
 import { getReleaseChecks } from '@/lib/release-readiness';
 import { canArchiveQuiz, compareQuizTitles, draftNextStep, quizGroup, quizMatchesQuery, targetPhase, type QuizGroup } from '@/lib/quiz-management';
 import type { TeacherQuiz } from '@/lib/server/teacher-overview';
-import { gradeLevels } from '@/lib/public-quiz-data';
-import { schoolTimeZone } from '@/lib/school-time';
+import { useSchoolSettings } from '@/components/school-settings-provider';
+import { gradeLevelsOf } from '@/lib/school-settings';
 
 type View = 'current' | 'draft' | 'upcoming' | 'active' | 'ended' | 'archived' | 'sample' | 'all';
 const sampleId = 'G8-DEMO-SCHOOL-DAY-01';
@@ -43,15 +44,6 @@ function inView(quiz: TeacherQuiz, view: View, now: number): boolean {
   return group === view;
 }
 
-const taipeiDateTime = new Intl.DateTimeFormat('zh-TW', {
-  timeZone: schoolTimeZone,
-  year: 'numeric',
-  month: '2-digit',
-  day: '2-digit',
-  hour: '2-digit',
-  minute: '2-digit',
-  hour12: false,
-});
 
 const groupBadge: Record<QuizGroup, { label: string; className: string }> = {
   draft: { label: '草稿 · 未發布', className: 'bg-slate-200 text-slate-800' },
@@ -68,6 +60,17 @@ export function QuizStudio({ quizzes, overviewError, now: renderedAt, autoSettin
   now: number;
   autoSettings?: Record<string, AutoFinalizeSetting>;
 }) {
+  const schoolSettings = useSchoolSettings();
+  const gradeLevels = gradeLevelsOf(schoolSettings);
+  const taipeiDateTime = new Intl.DateTimeFormat('zh-TW', {
+    timeZone: schoolSettings.timeZone,
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false,
+  });
   const [view, setView] = useState<View>('current');
   // 頁面開著時也要跟著時間走：班級到了截止時間要自動變成「已截止」並出現補考操作。
   const [now, setNow] = useState(renderedAt);
@@ -239,6 +242,7 @@ export function QuizStudio({ quizzes, overviewError, now: renderedAt, autoSettin
                           : <span className="rounded-full bg-emerald-600 px-3 py-1 text-sm font-black text-white">✓ 檢查通過，可發布</span>) : null}
                       </div>
                     </div>
+                    {quiz.status === 'published' ? <StudentLink quizId={quiz.quizId} version={quiz.version} /> : null}
                     {quiz.targets.length ? (
                       <ul className="mt-3 space-y-2 text-sm leading-6">
                         {quiz.targets.map((target) => {

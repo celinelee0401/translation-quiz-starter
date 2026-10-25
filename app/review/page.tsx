@@ -11,15 +11,17 @@ import { loadAutoFinalizeSettings, settingFor, type AutoFinalizeSetting } from '
 import { AiFirstPass } from '@/components/ai-first-pass';
 import { CONFIDENCE_BUCKETS, loadCalibration, loadSpotCheck, summarizeCalibration, type CalibrationBucket, type SpotCheckItem } from '@/lib/server/calibration';
 import { classCodePattern } from '@/lib/public-quiz-data';
-import { schoolTimeZone } from '@/lib/school-time';
+import { getSchoolSettings } from '@/lib/school-settings';
 
 export const dynamic = 'force-dynamic';
 
-const taipeiTime = new Intl.DateTimeFormat('zh-TW', {
-  timeZone: schoolTimeZone,
-  year: 'numeric', month: '2-digit', day: '2-digit',
-  hour: '2-digit', minute: '2-digit', hour12: false,
-});
+function schoolTime() {
+  return new Intl.DateTimeFormat('zh-TW', {
+    timeZone: getSchoolSettings().timeZone,
+    year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hour12: false,
+  });
+}
 
 export default async function ReviewPage({ searchParams }: { searchParams: Promise<{ quiz?: string; v?: string; class?: string; view?: string; focus?: string; spot?: string; calib?: string }> }) {
   if (!await isTeacherAuthenticated(new Request('https://translation.local/', { headers: await headers() }))) {
@@ -148,7 +150,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                   <h2 className="text-xl font-black">{attempt.classCode} 班 {attempt.seatNumber} 號</h2>
                   <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-bold text-amber-950">{attempt.status === 'finalized' ? `已定稿 ${attempt.finalScore} 分` : `待確認 ${attempt.answers.filter(answer => answer.finalScore === null).length} 題`}</span>
                 </div>
-                <p className="mt-1 text-sm text-muted-foreground">交卷時間 {taipeiTime.format(new Date(attempt.submittedAt))}</p>
+                <p className="mt-1 text-sm text-muted-foreground">交卷時間 {schoolTime().format(new Date(attempt.submittedAt))}</p>
                 <ol className="mt-4 space-y-4">
                   {attempt.answers.filter(visibleAnswer).map((answer) => (
                     <li key={answer.id} className={`rounded-xl p-4 text-sm leading-6 ${answer.openAppeal ? 'border-2 border-rose-500 bg-rose-50' : 'border border-border'}`}>
@@ -187,7 +189,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                           <ol className="mt-2 space-y-2">
                             {answer.history.map((entry, index) => (
                               <li key={`${entry.occurredAt}:${index}`}>
-                                {taipeiTime.format(new Date(entry.occurredAt))} · {entry.teacher} · {entry.previousScore ?? '未評'} → {entry.score} 分 · {entry.reason}
+                                {schoolTime().format(new Date(entry.occurredAt))} · {entry.teacher} · {entry.previousScore ?? '未評'} → {entry.score} 分 · {entry.reason}
                               </li>
                             ))}
                           </ol>
@@ -239,7 +241,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                             <li key={group.classCode} className="flex flex-wrap items-center justify-between gap-3 rounded-lg bg-white px-3 py-2">
                               <span>
                                 <b className="text-base">{group.classCode} 班</b>
-                                {group.opensAt ? <> · {taipeiTime.format(new Date(group.opensAt))} 開放</> : null}
+                                {group.opensAt ? <> · {schoolTime().format(new Date(group.opensAt))} 開放</> : null}
                                 {' '}· 已交 {group.submitted} 份 · 已定稿 {group.finalized} 份
                               </span>
                               <span className="flex flex-wrap gap-2">

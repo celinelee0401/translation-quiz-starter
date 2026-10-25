@@ -6,10 +6,11 @@ export type AiConfig = { provider: 'openai'; apiKey: string; model: string };
 const DEFAULT_OPENAI_MODEL = 'gpt-5.6-terra';
 
 export function getAiConfig(): AiConfig | null {
-  const provider = process.env.AI_PROVIDER?.trim().toLowerCase() || (process.env.OPENAI_API_KEY ? 'openai' : 'none');
-  if (provider !== 'openai') return null;
-  const apiKey = process.env.OPENAI_API_KEY;
-  if (!apiKey) return null;
+  // The deploy form cannot leave a secret blank, so `none` also means "no key".
+  const rawKey = process.env.OPENAI_API_KEY?.trim();
+  const apiKey = rawKey && rawKey.toLowerCase() !== 'none' ? rawKey : '';
+  const provider = process.env.AI_PROVIDER?.trim().toLowerCase() || (apiKey ? 'openai' : 'none');
+  if (provider !== 'openai' || !apiKey) return null;
   return { provider, apiKey, model: process.env.OPENAI_MODEL?.trim() || DEFAULT_OPENAI_MODEL };
 }
 

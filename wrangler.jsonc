@@ -1,14 +1,20 @@
 {
   // Cloudflare Workers 部署設定。name 會成為網址的一部分：
-  //   https://<name>.<你的帳號>.workers.dev
+  //   https://<name>.<你的帳號子網域>.workers.dev
   "name": "translation-quiz",
+  // 不要改成比 node_modules 裡 wrangler 支援的日期更新，否則本機無法啟動。
   "compatibility_date": "2026-05-15",
   "compatibility_flags": ["nodejs_compat"],
   "main": "vinext/server/fetch-handler",
-  // 非機密設定可以寫在這裡；金鑰一律用 `npx wrangler secret put <名稱>` 設定。
+  // 學校設定（不是機密）。部署後可在 Cloudflare → Workers → 你的 Worker → Settings → Variables 修改。
+  // 金鑰類（SUPABASE_SECRET_KEY 等）列在 .dev.vars.example，部署時會另外詢問。
   "vars": {
+    "SCHOOL_NAME": "示範國中",
+    "SCHOOL_CLASSES": "801:8, 802:8, 901:9, 902:9",
     "SCHOOL_YEAR": "115",
+    "SCHOOL_TIMEZONE": "Asia/Taipei",
     "STUDENT_LOGIN_MODE": "pin",
-    "AI_PROVIDER": "none"
+    "AI_PROVIDER": "none",
+    "OPENAI_MODEL": "gpt-5.6-terra"
   }
 }

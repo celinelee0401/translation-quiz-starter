@@ -44,13 +44,23 @@ async function teacherSetting(config: DataConfig): Promise<{ access_code_hash: s
   return rows[0] ?? null;
 }
 
+const PBKDF2_ITERATIONS = 100_000;
+
+/** Hash format stored in teacher_access_settings: v2.<salt>.<PBKDF2-SHA256>. */
+export async function hashTeacherCode(code: string): Promise<string> {
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const key = await crypto.subtle.importKey('raw', encoder.encode(code), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: PBKDF2_ITERATIONS }, key, 256);
+  return `v2.${base64url(salt)}.${base64url(new Uint8Array(bits))}`;
+}
+
 async function verifyCode(code: string, hash: string): Promise<boolean> {
   const [version, salt, expected] = hash.split('.');
   if (version !== 'v2' || !salt || !expected) return false;
   const saltBytes = decode(salt);
   if (!saltBytes) return false;
   const key = await crypto.subtle.importKey('raw', encoder.encode(code), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: saltBytes.buffer as ArrayBuffer, iterations: 100_000 }, key, 256);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt: saltBytes.buffer as ArrayBuffer, iterations: PBKDF2_ITERATIONS }, key, 256);
   return equal(base64url(new Uint8Array(bits)), expected);
 }
 

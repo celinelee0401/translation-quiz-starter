@@ -1,6 +1,14 @@
-import { schoolConfig } from '../school.config.ts';
+import {
+  classCodePattern,
+  classCodesForGrade as codesForGrade,
+  classCodesForQuizId as codesForQuizId,
+  getSchoolSettings,
+  gradeLevelForClass as gradeForClass,
+  isSupportedGrade as supportedGrade,
+  type SchoolSettings,
+} from './school-settings.ts';
 
-export type Grade = `G${number}`;
+export { classCodePattern };
 
 export const publicQuizMeta = {
   id: 'G8-DEMO-SCHOOL-DAY-01',
@@ -11,15 +19,6 @@ export const publicQuizMeta = {
   maxScore: 90,
 };
 
-export const publicClassCatalog: Record<Grade, string[]> = Object.fromEntries(
-  [...new Set(schoolConfig.classes.map((item) => item.grade))].map((grade) => [
-    `G${grade}`,
-    schoolConfig.classes.filter((item) => item.grade === grade).map((item) => item.code),
-  ]),
-);
-
-export const gradeLevels: number[] = [...new Set(schoolConfig.classes.map((item) => item.grade))].sort((a, b) => a - b);
-
 // Only prompts and stable question keys may be imported by the student bundle.
 export const publicQuizQuestions = [
   { id: 'Q1', prompt: 'Mia，你今天早上幾點到學校？' },
@@ -29,29 +28,24 @@ export const publicQuizQuestions = [
   { id: 'Q5', prompt: '真糟糕！' },
 ] as const;
 
-// Class codes may use letters, digits and hyphens (see school.config.ts).
-export const classCodePattern = /^[A-Za-z0-9-]{1,16}$/;
-
-export function isSupportedGrade(grade: unknown): grade is number {
-  return typeof grade === 'number' && gradeLevels.includes(grade);
+// Server-side shortcuts that read the current deployment settings. Client
+// components use the same helpers from school-settings.ts with useSchoolSettings().
+export function isSupportedClassCode(classCode: string, settings: SchoolSettings = getSchoolSettings()): boolean {
+  return settings.classes.some((item) => item.code === classCode);
 }
 
-export function isSupportedClassCode(classCode: string): boolean {
-  return schoolConfig.classes.some((item) => item.code === classCode);
+export function gradeLevelForClass(classCode: string, settings: SchoolSettings = getSchoolSettings()): number | null {
+  return gradeForClass(settings, classCode);
 }
 
-export function gradeLevelForClass(classCode: string): number | null {
-  return schoolConfig.classes.find((item) => item.code === classCode)?.grade ?? null;
+export function isSupportedGrade(grade: unknown, settings: SchoolSettings = getSchoolSettings()): grade is number {
+  return supportedGrade(settings, grade);
 }
 
-export function classCodesForGrade(grade: number): string[] {
-  return schoolConfig.classes.filter((item) => item.grade === grade).map((item) => item.code);
+export function classCodesForGrade(grade: number, settings: SchoolSettings = getSchoolSettings()): string[] {
+  return codesForGrade(settings, grade);
 }
 
-// Quiz IDs are only a UI hint. The server still verifies the student's actual
-// class, the quiz target and its open window before allowing an attempt.
-export function classCodesForQuizId(quizId: string | null): string[] {
-  const grade = /(?:^|-)G(\d{1,2})(?:-|$)/i.exec(quizId ?? '')?.[1];
-  const classes = grade ? classCodesForGrade(Number(grade)) : [];
-  return classes.length ? classes : schoolConfig.classes.map((item) => item.code);
+export function classCodesForQuizId(quizId: string | null, settings: SchoolSettings = getSchoolSettings()): string[] {
+  return codesForQuizId(settings, quizId);
 }

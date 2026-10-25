@@ -1,11 +1,5 @@
-import {
-  publicClassCatalog,
-  publicQuizMeta,
-  publicQuizQuestions,
-  type Grade,
-} from './public-quiz-data.ts';
+import { publicQuizMeta, publicQuizQuestions } from './public-quiz-data.ts';
 
-export type { Grade } from './public-quiz-data';
 export type ScoreMode = 'practice' | 'formal';
 export type FeedbackPolicy =
   | 'immediate'
@@ -37,8 +31,6 @@ export const quizMeta = {
   ...publicQuizMeta,
   rubricVersion: 'rubric-v2',
 };
-
-export const classCatalog: Record<Grade, string[]> = publicClassCatalog;
 
 export const quizQuestions: QuizQuestion[] = [
   {

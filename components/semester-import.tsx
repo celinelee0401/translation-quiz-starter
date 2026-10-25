@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, type ChangeEvent } from 'react';
-import { isSupportedGrade } from '@/lib/public-quiz-data';
+import { useSchoolSettings } from '@/components/school-settings-provider';
+import { isSupportedGrade, type SchoolSettings } from '@/lib/school-settings';
 
 type Question = { prompt: string; answer: string; hint: string; meaning: number; grammar: number };
 type Draft = { title: string; unit: string; grade: number; scoreMode: 'practice' | 'formal'; questions: Question[] };
@@ -9,12 +10,12 @@ type Row = Draft & { total: number; exists: boolean; problem: string; result?: s
 
 const total = (draft: Draft) => draft.questions.reduce((sum, q) => sum + Number(q.meaning) + Number(q.grammar) + 1, 0);
 
-function check(value: unknown): Draft[] {
+function check(value: unknown, settings: SchoolSettings): Draft[] {
   if (!Array.isArray(value) || value.length === 0 || value.length > 80) throw new Error('檔案內容應該是 1～80 份測驗的清單。');
   return value.map((item, index) => {
     const draft = item as Partial<Draft>;
     if (!draft || typeof draft.title !== 'string' || typeof draft.unit !== 'string' ||
-      !isSupportedGrade(draft.grade) || !Array.isArray(draft.questions)) {
+      !isSupportedGrade(settings, draft.grade) || !Array.isArray(draft.questions)) {
       throw new Error(`第 ${index + 1} 份測驗缺少名稱、單元、年級或題目。`);
     }
     return { title: draft.title, unit: draft.unit, grade: draft.grade,
@@ -27,6 +28,7 @@ function check(value: unknown): Draft[] {
  * draft endpoint, so the same checks apply; nothing is published.
  */
 export function SemesterImport({ existingTitles }: { existingTitles: string[] }) {
+  const settings = useSchoolSettings();
   const [rows, setRows] = useState<Row[]>([]);
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
@@ -37,7 +39,7 @@ export function SemesterImport({ existingTitles }: { existingTitles: string[] })
     const file = event.target.files?.[0];
     if (!file) return;
     try {
-      const drafts = check(JSON.parse(await file.text()));
+      const drafts = check(JSON.parse(await file.text()), settings);
       const taken = new Set(existingTitles.map(title => title.trim()));
       setRows(drafts.map(draft => ({ ...draft, total: total(draft), exists: taken.has(draft.title.trim()),
         problem: draft.questions.length < 1 || draft.questions.length > 50 ? '題數需為 1～50 題' :

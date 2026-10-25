@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import type { NewQuestion } from '@/lib/server/create-quiz-draft';
-import { gradeLevels } from '@/lib/public-quiz-data';
+import { useSchoolSettings } from '@/components/school-settings-provider';
+import { gradeLevelsOf } from '@/lib/school-settings';
 
 const blank = (): NewQuestion => ({ prompt: '', answer: '', hint: '', meaning: 5, grammar: 4 });
 
@@ -30,6 +31,7 @@ export function NewQuizDraft() {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [unit, setUnit] = useState('');
+  const gradeLevels = gradeLevelsOf(useSchoolSettings());
   const [grade, setGrade] = useState<number>(gradeLevels[0] ?? 8);
   const [scoreMode, setScoreMode] = useState<'formal' | 'practice'>('formal');
   const [questions, setQuestions] = useState<NewQuestion[]>([blank()]);

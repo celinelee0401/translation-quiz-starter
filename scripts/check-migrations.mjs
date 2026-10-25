@@ -1,16 +1,14 @@
-// 在記憶體中的 Postgres（PGlite）套用 supabase/migrations，並驗證登入、提交與改分流程。
+// 在記憶體中的 Postgres（PGlite）套用 supabase/setup.sql，並驗證登入、提交與改分流程。
 // 用法：npm run check:db（不連線任何外部資料庫）。
 import { PGlite } from '@electric-sql/pglite';
 import { pgcrypto } from '@electric-sql/pglite/contrib/pgcrypto';
-import { readFileSync, readdirSync } from 'node:fs';
-const dir = process.argv[2] ?? new URL('../supabase/migrations', import.meta.url).pathname;
+import { readFileSync } from 'node:fs';
 const db = new PGlite({ extensions: { pgcrypto } });
 // Supabase provides these roles and schema; recreate them for a faithful check.
 await db.exec(`create role anon; create role authenticated; create role service_role; create schema extensions;`);
-for (const f of readdirSync(dir).filter(n => n.endsWith('.sql')).sort()) {
-  await db.exec(readFileSync(`${dir}/${f}`, 'utf8'));
-  console.log('applied', f);
-}
+// Run the single file teachers paste into the SQL Editor.
+await db.exec(readFileSync(new URL('../supabase/setup.sql', import.meta.url), 'utf8'));
+console.log('applied supabase/setup.sql');
 const q = async (sql, p = []) => (await db.query(sql, p)).rows;
 const one = async (sql, p) => Object.values((await q(sql, p))[0])[0];
 let ok = 0; const check = (c, m) => { if (!c) { console.error('FAIL', m); process.exit(1); } ok++; console.log('ok', m); };

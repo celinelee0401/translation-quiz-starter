@@ -22,7 +22,7 @@ export function parseRoster(text: string, loginMode: DataConfig['loginMode']): R
     if (index === 0 && !/^\d+$/.test(seat)) return; // header row
     const where = `第 ${index + 1} 行`;
     if (rest.length) throw new RequestInputError(`${where}：欄位太多，格式是「班級,座號,PIN」。`);
-    if (!isSupportedClassCode(classCode)) throw new RequestInputError(`${where}：班級 ${classCode} 不在 school.config.ts。`);
+    if (!isSupportedClassCode(classCode)) throw new RequestInputError(`${where}：班級 ${classCode} 不在網站的班級設定（SCHOOL_CLASSES）裡。`);
     const seatNumber = Number(seat);
     if (!Number.isInteger(seatNumber) || seatNumber < 1 || seatNumber > 99) throw new RequestInputError(`${where}：座號需為 1–99。`);
     if (pin && !/^\d{6}$/.test(pin)) throw new RequestInputError(`${where}：PIN 需為六位數字。`);

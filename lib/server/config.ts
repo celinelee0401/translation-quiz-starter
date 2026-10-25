@@ -18,12 +18,25 @@ export type DataConfig = AuthConfig & {
  * - `seat`：只要班級＋座號，任何人都能冒用別人座號，只適合練習。
  */
 export function getStudentLoginMode(): StudentLoginMode {
-  return process.env.STUDENT_LOGIN_MODE === 'seat' ? 'seat' : 'pin';
+  return process.env.STUDENT_LOGIN_MODE?.trim().toLowerCase() === 'seat' ? 'seat' : 'pin';
+}
+
+/**
+ * TRANSLATION_SESSION_SECRET is optional. Without it, login cookies are signed
+ * with a key derived from SUPABASE_SECRET_KEY (still server-only), so a new
+ * teacher only has to paste the two Supabase values. Rotating either one signs
+ * everybody out.
+ */
+export function getSessionSecret(env: Record<string, string | undefined> = process.env): string | null {
+  const explicit = env.TRANSLATION_SESSION_SECRET?.trim();
+  if (explicit) return explicit.length >= 32 ? explicit : null;
+  const supabaseKey = env.SUPABASE_SECRET_KEY?.trim();
+  return supabaseKey && supabaseKey.length >= 20 ? `translation-session-from-supabase-v1:${supabaseKey}` : null;
 }
 
 export function getAuthConfig(): AuthConfig | null {
-  const schoolYear = process.env.SCHOOL_YEAR;
-  const sessionSecret = process.env.TRANSLATION_SESSION_SECRET;
+  const schoolYear = process.env.SCHOOL_YEAR?.trim();
+  const sessionSecret = getSessionSecret();
 
   if (
     !schoolYear ||
@@ -44,8 +57,8 @@ export function getAuthConfig(): AuthConfig | null {
 
 export function getDataConfig(): DataConfig | null {
   const auth = getAuthConfig();
-  const supabaseUrl = normalizeUrl(process.env.SUPABASE_URL);
-  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY;
+  const supabaseUrl = normalizeUrl(process.env.SUPABASE_URL?.trim());
+  const supabaseSecretKey = process.env.SUPABASE_SECRET_KEY?.trim();
   if (!auth || !supabaseUrl || !supabaseSecretKey) return null;
   return { ...auth, supabaseUrl, supabaseSecretKey };
 }
