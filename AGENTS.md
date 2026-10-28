@@ -2,7 +2,7 @@
 
 ## 開始之前
 
-1. 先讀 `README.md`、`CONTEXT.md`；替老師架設系統時照 `PROMPT.md` 與 `docs/新手架設指南.md` 進行。
+1. 先讀 `README.md`、`CONTEXT.md`；替老師架設系統時照 `PROMPT.md` 與 `docs/setup-guide.md` 進行。
 2. 以繁體中文和老師溝通，一次一步，說明影響學生、成績或開放時段的範圍。
 
 ## 不可更動的核心
@@ -16,6 +16,6 @@
 
 - 涉及身分、班級分流、分數或回饋的修改要加測試，並執行 `npm test`、`npm run check:db`、`npm run build`。
 - 新增資料庫變更用新的 migration 檔，不改已套用的舊檔；改完執行 `npm run build:sql` 更新 `supabase/setup.sql`。
-- 修改操作流程或畫面文字時，同步更新 `docs/新手架設指南.md`。
+- 修改操作流程或畫面文字時，同步更新 `docs/setup-guide.md`。
 - 不把金鑰、PIN、教師通行碼、學生名單寫進程式、文件或 Git；不用真實學生資料測試。
 - Commit、push、部署、資料庫寫入前先取得老師同意。

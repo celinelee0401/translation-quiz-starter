@@ -6,11 +6,13 @@
 
 ## 🚀 開始架設
 
-**第一次架設，請照 👉 [新手架設指南](docs/新手架設指南.md) 一步一步做**（約 40–60 分鐘）。指南會先帶你建好資料庫，再按下面這顆按鈕：
+**第一次架設？把這個網址交給你的 AI 助理**（ChatGPT、Claude、Gemini、Codex 都可以），對它說「請讀這份指南，一步一步帶我架設，我做完會截圖給你」：
+
+👉 **https://github.com/celinelee0401/translation-quiz-starter/blob/main/docs/setup-guide.md**
+
+AI 會一次給你一步，你做完截圖給它，它確認後再告訴你下一步，大約 40–60 分鐘完成。不想用 AI 的老師，也可以自己照著[這份指南](docs/setup-guide.md)做。指南會先帶你建好資料庫，再按下面這顆按鈕：
 
 [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/celinelee0401/translation-quiz-starter)
-
-想請 AI 助理陪你一起做？把 [`PROMPT.md`](PROMPT.md) 整份貼給它（ChatGPT、Claude、Gemini 都可以）。
 
 ## 固定的核心（不能關）
 
