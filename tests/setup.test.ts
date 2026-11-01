@@ -42,6 +42,16 @@ void test('setup checklist explains missing tables, wrong keys, and never echoes
   assert.equal(noDb.find((c) => c.key === 'setup-code')?.state, 'todo');
 });
 
+void test('values copied from the old example file count as not configured', async () => {
+  const sample = { ...env, SUPABASE_SECRET_KEY: 'sb_secret_replace_me', SETUP_CODE: 'replace-with-your-own-phrase' };
+  const checks = await loadSetupChecks(sample, respond({}));
+  assert.equal(checks.find((c) => c.key === 'database')?.state, 'error');
+  assert.match(checks.find((c) => c.key === 'database')?.detail ?? '', /SUPABASE_SECRET_KEY 還是範本的示範文字/);
+  assert.equal(checks.find((c) => c.key === 'setup-code')?.state, 'error');
+  await assert.rejects(setTeacherCode({ setupCode: 'replace-with-your-own-phrase', teacherCode: 'teacher-code-1' }, sample, respond({})),
+    /示範文字/);
+});
+
 void test('teacher code can only be set with the deployment setup code', async () => {
   const prior = { ...process.env };
   Object.assign(process.env, env);

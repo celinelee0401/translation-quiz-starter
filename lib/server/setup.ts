@@ -28,9 +28,13 @@ export async function loadSetupChecks(env: Env = process.env, fetcher: typeof fe
 
   const url = env.SUPABASE_URL?.trim();
   const key = env.SUPABASE_SECRET_KEY?.trim();
+  const sampleName = isSampleValue(url) ? 'SUPABASE_URL' : isSampleValue(key) ? 'SUPABASE_SECRET_KEY' : '';
   let validUrl = false;
   try { validUrl = Boolean(url && new URL(url).protocol === 'https:'); } catch { validUrl = false; }
-  if (!validUrl || !key) {
+  if (sampleName) {
+    checks.push({ key: 'database', title: '連線 Supabase 資料庫', state: 'error',
+      detail: `${sampleName} 還是範本的示範文字。請到 Cloudflare 把它換成你自己的值（部署表單上的點點不代表已經填好）。` });
+  } else if (!validUrl || !key) {
     checks.push({ key: 'database', title: '連線 Supabase 資料庫', state: 'todo',
       detail: !validUrl ? '還沒填 SUPABASE_URL（Supabase 的 Project URL，https:// 開頭）。' : '還沒填 SUPABASE_SECRET_KEY（Supabase 的 secret key，sb_secret_ 開頭）。' });
   } else if (!getSessionSecret(env)) {
@@ -47,14 +51,26 @@ export async function loadSetupChecks(env: Env = process.env, fetcher: typeof fe
     }
   }
 
-  checks.push({ key: 'setup-code', title: '設定碼（SETUP_CODE）', state: (env.SETUP_CODE?.trim().length ?? 0) >= 8 ? 'ok' : 'todo',
-    detail: (env.SETUP_CODE?.trim().length ?? 0) >= 8 ? '已設定。設定或重設教師通行碼時需要輸入。' : '請在 Cloudflare 的變數設定加入 SETUP_CODE（自己想一組至少 8 個字元的密語）。' });
+  const setupCode = env.SETUP_CODE?.trim() ?? '';
+  checks.push(isSampleValue(setupCode)
+    ? { key: 'setup-code', title: '設定碼（SETUP_CODE）', state: 'error',
+        detail: 'SETUP_CODE 還是範本的示範文字，任何人都查得到。請到 Cloudflare 換成你自己想的密語。' }
+    : { key: 'setup-code', title: '設定碼（SETUP_CODE）', state: setupCode.length >= 8 ? 'ok' : 'todo',
+        detail: setupCode.length >= 8 ? '已設定。設定或重設教師通行碼時需要輸入。' : '請在 Cloudflare 的變數設定加入 SETUP_CODE（自己想一組至少 8 個字元的密語）。' });
   const ai = getAiConfig();
   checks.push({ key: 'ai', title: 'AI 批改建議（可不開）', state: 'ok',
     detail: ai ? `已開啟（OpenAI，模型 ${ai.model}）。` : '未開啟：系統用固定規則＋老師批改。要開啟請設定 AI_PROVIDER=openai 與 OPENAI_API_KEY。' });
   checks.push({ key: 'login-mode', title: '學生登入方式', state: 'ok',
     detail: getStudentLoginMode() === 'pin' ? '班級＋座號＋PIN。' : '班級＋座號（練習用，任何人都能用別人的座號）。' });
   return checks;
+}
+
+// Sample values that older copies of .dev.vars.example put into the deploy form.
+// They are public, so a site still using them must not count as configured.
+const SAMPLE_VALUES = new Set(['https://your-project.supabase.co', 'sb_secret_replace_me', 'replace-with-your-own-phrase']);
+
+export function isSampleValue(value: string | undefined): boolean {
+  return SAMPLE_VALUES.has(value?.trim() ?? '');
 }
 
 async function probeDatabase(url: string, key: string, fetcher: typeof fetch) {
@@ -97,6 +113,7 @@ export async function setTeacherCode(
 ): Promise<void> {
   const expected = env.SETUP_CODE?.trim() ?? '';
   if (expected.length < 8) throw new RequestInputError('這個網站還沒設定 SETUP_CODE，請先到 Cloudflare 加入這個變數。', 409);
+  if (isSampleValue(expected)) throw new RequestInputError('SETUP_CODE 還是範本的示範文字，請先到 Cloudflare 換成你自己想的密語。', 409);
   const config = getDataConfig();
   if (!config) throw new RequestInputError('資料庫設定尚未完成，請先完成上方檢查項目。', 409);
   const setupCode = typeof input.setupCode === 'string' ? input.setupCode.trim() : '';

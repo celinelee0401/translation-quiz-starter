@@ -1,5 +1,11 @@
 # 機密設定。一鍵部署時 Cloudflare 會逐項詢問；本機開發時複製成 .dev.vars 再填入。
-SUPABASE_URL=https://your-project.supabase.co # Supabase 的 Project URL
-SUPABASE_SECRET_KEY=sb_secret_replace_me # Supabase 的 secret key（sb_secret_ 開頭）
-SETUP_CODE=replace-with-your-own-phrase # 自己想一組至少 8 字元的設定碼，用來設定教師通行碼
-OPENAI_API_KEY=none # 不用 AI 就填 none
+# 等號後面刻意留空：部署表單上空白的欄位就是要自己填的。
+
+# Supabase 的 Project URL（https:// 開頭）
+SUPABASE_URL=
+# Supabase 的 secret key（sb_secret_ 開頭）
+SUPABASE_SECRET_KEY=
+# 自己想一組至少 8 字元的設定碼，用來設定教師通行碼
+SETUP_CODE=
+# 不用 AI 就填 none
+OPENAI_API_KEY=none

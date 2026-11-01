@@ -150,18 +150,33 @@ Cloudflare 會把網站放上網路，讓學生用網址打開。
 
 1. 打開 <https://deploy.workers.cloudflare.com/?url=https://github.com/celinelee0401/translation-quiz-starter>（這就是 README 上的 **Deploy to Cloudflare** 按鈕）。
 2. 還沒有 Cloudflare 帳號 → 按 **Sign up** 註冊（email＋密碼），到信箱點驗證信後回到這個頁面。
-3. **連接 GitHub**：選 **GitHub**，按 **Authorize／Install**，允許 Cloudflare 在你的 GitHub 建立一份網站程式。
-4. 設定專案：
-   - **Git account**：選你的 GitHub 帳號。
-   - **Repository name**：保留預設。可以勾選 **Private**。
+3. 出現 **Set up your application** 頁面。**第一次使用**時，Git account 底下只有 **New GitHub connection** 按鈕：
+   - 按 **New GitHub connection** → GitHub 會問要不要讓 Cloudflare 存取 → 選你的帳號，按 **Install & Authorize**（選 All repositories 或 Only select repositories 都可以）。
+
+   ![第一次使用：Git account 底下只有 New GitHub connection](images/cloudflare-deploy-form-connect-github.png)
+
+   > ⚠️ **如果授權完跑到「Select a repository」（列出你 GitHub 上所有 repo 的頁面）：這是走錯頁了，不要選任何 repo、不要按 Next。** 重新打開第 1 步的連結，回到 Set up your application 頁面。
+   >
+   > ![走錯頁：Select a repository](images/cloudflare-wrong-page-select-repository.png)
+
+4. 回到 Set up your application 頁面後：
+   - **Git account**：欄位顯示灰色的 **Select…**，**要點一下**才會跳出清單 → 點 **Connected accounts** 底下你的 GitHub 帳號（不要再點 New GitHub connection）。
+
+     ![點 Select… 才會出現已連接的帳號](images/cloudflare-deploy-form-select-account.png)
+
+   - **Create private Git repository**：保持勾選。（Cloudflare 會在你的 GitHub 建一份網站程式，之後改設定不用碰它。）
    - **Project name**：保留 `translation-quiz`，或改成你想要的英文名稱（會出現在網址裡）。
 
-   ✅ **檢查點（可截圖）**：畫面上看得到 Git account、Repository name、Project name 三個欄位已填好。
+   ✅ **檢查點（可截圖）**：Git account 顯示你的 GitHub 帳號，Project name 已填好。
 
-5. 往下找到 **變數與機密（Variables and Secrets）** 表單，照下表填寫（AI 會根據開始前問到的答案告訴你要填什麼）：
+5. 往下捲，照下表填寫每個欄位（AI 會根據開始前問到的答案告訴你要填什麼）。機密欄位在上面，學校設定在下面：
 
 | 欄位 | 要填什麼 |
 |---|---|
+| 🔒 `SUPABASE_URL` | 貼上步驟 4 的 Project URL |
+| 🔒 `SUPABASE_SECRET_KEY` | 貼上步驟 4 的 Secret key（完整一行） |
+| 🔒 `SETUP_CODE` | **自己想一組至少 8 個字的密語**，例如 `月亮喜歡吃蘋果2026`，寫在記事本 |
+| 🔒 `OPENAI_API_KEY` | 填 `none` |
 | `SCHOOL_NAME` | 學校名稱，例如 `光明國中` |
 | `SCHOOL_CLASSES` | 班級與年級，格式 `班級:年級`，用逗號分隔，例如 `801:8, 802:8, 803:8` |
 | `SCHOOL_YEAR` | 目前學年，例如 `115` |
@@ -169,20 +184,24 @@ Cloudflare 會把網站放上網路，讓學生用網址打開。
 | `STUDENT_LOGIN_MODE` | `pin`（要 PIN，正式成績用）或 `seat`（不要 PIN，練習用） |
 | `AI_PROVIDER` | 保留 `none` |
 | `OPENAI_MODEL` | 不用改 |
-| 🔒 `SUPABASE_URL` | 貼上步驟 4 的 Project URL |
-| 🔒 `SUPABASE_SECRET_KEY` | 貼上步驟 4 的 Secret key |
-| 🔒 `SETUP_CODE` | **自己想一組至少 8 個字的密語**，例如 `月亮喜歡吃蘋果2026`，寫在記事本 |
-| 🔒 `OPENAI_API_KEY` | 填 `none` |
 
-   **填完機密欄位後就不要截整個表單。** 可以只截上半部（學校名稱、班級那幾欄）請 AI 檢查格式。
+   > ⚠️ **機密欄位裡的內容會顯示成一排點點（●●●●）。看到點點不代表已經填好**：如果欄位裡本來就有點點（舊版範本會預先放示範文字），請在欄位裡按一下 → 全選（Mac：⌘＋A；Windows：Ctrl＋A）→ 刪除 → 再貼上你自己的值。`OPENAI_API_KEY` 的 4 個點就是 `none`，不用改。
+   >
+   > ![機密欄位顯示成點點](images/cloudflare-deploy-form-sample-values.png)
+
+   **填完機密欄位後就不要截整個表單。** 可以只截學校設定那幾欄請 AI 檢查格式。
 
 6. 建置與部署指令（Build command／Deploy command）會自動填好，**不要改**。
-7. 按 **Create and deploy**（或 **Deploy**），等 2–5 分鐘。
+7. 按 **Deploy**，等 2–5 分鐘。畫面會跳到建置頁面，上方有 Initializing、Cloning、Installing、Building、Deploying 五個步驟。
 
-✅ **檢查點（可截圖）**：畫面顯示 **Success**（或綠色勾勾），並出現一個 `https://….workers.dev` 網址。**把這個網址記下來。**
+✅ **檢查點（可截圖）**：五個步驟都出現綠色勾勾。
+
+![建置成功：五個步驟都打勾](images/cloudflare-build-success.png)
+
+8. 找網站網址：點頁面上方的 **Overview**，找 `https://` 開頭、`.workers.dev` 結尾的網址（格式是 `https://專案名稱.你的子網域.workers.dev`）。**把這個網址記下來。**
 
 **常見狀況**
-- 建置失敗（Build failed）→ 點開 **Logs**，截最後幾行紅字給 AI（這部分不含機密），或按 **Retry deployment** 再試一次。
+- 建置失敗（Build failed）→ 點開 **Logs**，截最後幾行紅字給 AI（這部分不含機密），或按右上角的 **Retry build** 再試一次。
 - 找不到變數表單 → 先部署，之後到 Cloudflare 左側 **Workers & Pages** → 你的專案 → **Settings** → **Variables and Secrets** 新增，改完按 **Deploy**。
 
 ---
@@ -197,6 +216,7 @@ Cloudflare 會把網站放上網路，讓學生用網址打開。
 **要修改變數時**：Cloudflare → **Workers & Pages** → 你的專案 → **Settings** → **Variables and Secrets**，改好後按 **Deploy**，等一分鐘再重新整理 `/setup`。
 
 **常見狀況**
+- 「還是範本的示範文字」→ 部署時沒有把點點清掉重貼。到 Cloudflare 變數把那一項換成你自己的值。
 - 「還沒建立資料表」→ 回到步驟 3。
 - 「secret key 不正確」→ 多半是複製到 publishable key 或少一段；到 Cloudflare 變數重新貼上 `SUPABASE_SECRET_KEY`。
 - 「連不到」→ Supabase 專案可能被暫停，到 Supabase 按 Restore。
