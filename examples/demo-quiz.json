@@ -5,11 +5,11 @@
     "grade": 8,
     "scoreMode": "practice",
     "questions": [
-      { "prompt": "Mia，你今天早上幾點到學校？", "answer": "Mia, / what time did you get / to school / this morning?", "hint": "詢問過去發生的時間，用 What time did you...？did 後面的動詞用原形。", "meaning": 12, "grammar": 7 },
-      { "prompt": "我七點半和我哥哥一起到學校。", "answer": "I got to school / at seven thirty / with my brother.", "hint": "get 的過去式是 got；「和……一起」用 with。", "meaning": 12, "grammar": 7 },
-      { "prompt": "你的第一堂課是什麼？", "answer": "What is / your first class?", "hint": "詢問「是什麼」用 What is...？first 表示「第一」。", "meaning": 10, "grammar": 9 },
-      { "prompt": "第一堂是數學，但是我忘了帶課本。", "answer": "My first class is math, / but I forgot / to bring my textbook.", "hint": "forget 的過去式是 forgot；「忘了做某事」用 forget to + 原形動詞。", "meaning": 12, "grammar": 7 },
-      { "prompt": "真糟糕！", "answer": "That's too bad!", "hint": "表達同情的常見說法是 That's too bad!，結尾用驚嘆號。", "meaning": 6, "grammar": 3 }
+      { "prompt": "Mia，你今天早上幾點到學校？", "answer": "Mia, / what time did you get / to school / this morning?", "hint": "詢問過去發生的時間，用 What time did you...？did 後面的動詞用原形。", "meaning": 14, "grammar": 7 },
+      { "prompt": "我七點半和我哥哥一起到學校。", "answer": "I got to school / at seven thirty / with my brother.", "hint": "get 的過去式是 got；「和……一起」用 with。", "meaning": 14, "grammar": 7 },
+      { "prompt": "你的第一堂課是什麼？", "answer": "What is / your first class?", "hint": "詢問「是什麼」用 What is...？first 表示「第一」。", "meaning": 12, "grammar": 9 },
+      { "prompt": "第一堂是數學，但是我忘了帶課本。", "answer": "My first class is math, / but I forgot / to bring my textbook.", "hint": "forget 的過去式是 forgot；「忘了做某事」用 forget to + 原形動詞。", "meaning": 14, "grammar": 7 },
+      { "prompt": "真糟糕！", "answer": "That's too bad!", "hint": "表達同情的常見說法是 That's too bad!，結尾用驚嘆號。", "meaning": 8, "grammar": 3 }
     ]
   }
 ]

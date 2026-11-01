@@ -9,7 +9,7 @@ export function PublishQuiz({ quizId, quizVersion, classes, ready }: {
   const [message, setMessage] = useState('');
 
   async function publish() {
-    if (!ready || !window.confirm(`確定發布「${quizId}」給 ${classes.join('、')} 班？發布後，符合各班開放時段時會自動出現在 Dashboard；學生也可開始作答。`)) return;
+    if (!ready || !window.confirm(`確定發布「${quizId}」給 ${classes.join('、')} 班？發布後，到各班開放時段，學生就能從作答連結進入作答。`)) return;
     setBusy(true); setMessage('');
     try {
       const response = await fetch('/api/teacher/publish', {
@@ -26,7 +26,7 @@ export function PublishQuiz({ quizId, quizVersion, classes, ready }: {
   }
 
   return <div className="mt-3 rounded-xl border border-cyan-300 bg-cyan-50 p-4 text-sm">
-    <p className="font-black">發布到學生端與 Dashboard</p>
+    <p className="font-black">發布到學生端</p>
     <p className="mt-1 leading-6">儲存班級時間只會保留草稿。發布後仍依每班開放與截止時間顯示；不會提前公開答案。</p>
     <button type="button" disabled={!ready || busy} onClick={publish}
       className="mt-3 min-h-11 rounded-lg bg-primary px-4 font-black text-primary-foreground disabled:cursor-not-allowed disabled:opacity-50">

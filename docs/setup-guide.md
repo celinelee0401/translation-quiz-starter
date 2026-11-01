@@ -41,11 +41,12 @@
 ## 開始前準備（老師）
 
 - 一台電腦（建議用 Chrome 瀏覽器）、一個常用的 email 信箱。
+  - 請用**一般的 Chrome 或 Safari 視窗**操作，不要用 AI 工具或其他 App 裡面內建的瀏覽器：內建瀏覽器的「複製」按鈕有時會失敗。
 - 一個記事本（紙本或電腦的記事本都可以），暫時記下等一下會拿到的東西：
 
 | 要記下的東西 | 在哪一步拿到 | 機密嗎？ |
 |---|---|---|
-| Supabase 資料庫密碼 | 步驟 2 | 🔒 自己保存 |
+| Supabase 資料庫密碼（複製不了可略過，網站用不到） | 步驟 2 | 🔒 自己保存 |
 | Project URL（`https://…supabase.co`） | 步驟 4 | 不機密 |
 | Secret key（`sb_secret_…`） | 步驟 4 | 🔒 不要給任何人、不要截圖 |
 | 設定碼（自己想的密語） | 步驟 5 | 🔒 |
@@ -75,8 +76,16 @@ Supabase 是存放題目、學生名冊和作答紀錄的資料庫。
 2. 如果要求建立 **Organization（組織）**：Name 隨意（例如 `我的學校`）、Type 選 Personal、Plan 選 **Free（$0/month）**，按 **Create organization**。
 3. 建立專案（**New project**）：
    - **Project name**：`translation-quiz`
-   - **Database Password**：🔒 按 **Generate a password**，複製後貼到記事本保存。
-   - **Region**：選 **Northeast Asia (Tokyo)**。
+   - **Database Password**：🔒 按 **Generate a password**。能複製就貼到記事本保存；**複製不了也沒關係，直接往下做**。這個網站用不到這組密碼（網站用步驟 4 的 Secret key 連資料庫），日後真的需要時，可以到 Supabase 的 **Project Settings → Database** 重設。
+   - **Region**：按下方的 **Need a specific region?**，選 **Northeast Asia (Tokyo)**（離台灣最近）。如果只選大區 **Asia-Pacific** 也能用，但可能被分到雪梨，速度稍慢。
+   - 如果有 **Security** 區塊，照下面設定：
+     - **Enable Data API**：✅ **保持勾選**（取消的話網站會連不上資料庫）。
+     - **Automatically expose new tables**：⬜ **取消勾選**（比較安全；步驟 3 的 SQL 已經設定好誰能讀寫）。
+     - **Enable automatic RLS**：勾不勾都可以（步驟 3 的 SQL 會自己開）。
+
+     ![建立專案時的 Region 與 Security 區塊](images/supabase-new-project-security.png)
+     （上圖是預設狀態；請把中間的 **Automatically expose new tables** 取消勾選。）
+
    - 按 **Create new project**。
 4. 等 1–2 分鐘。
 
@@ -90,8 +99,18 @@ Supabase 是存放題目、學生名冊和作答紀錄的資料庫。
 
 1. 打開這個檔案：<https://github.com/celinelee0401/translation-quiz-starter/blob/main/supabase/setup.sql>
    按檔案右上角的 **複製** 圖示（兩個重疊的方框，Copy raw file），一次複製全部內容。
+   - 如果出現 **Something went wrong. Try again.**（複製失敗）：改按旁邊的 **Raw** 按鈕，會打開一頁只有純文字的畫面；在那頁按一下，再按 **全選**（Mac：⌘＋A；Windows：Ctrl＋A）和 **複製**（Mac：⌘＋C；Windows：Ctrl＋C）。
+
+     ![按複製圖示後出現 Something went wrong](images/github-copy-raw-failed.png)
+
 2. 回到 Supabase，左側選單點 **SQL Editor**（圖示像 `>_`）。
-3. 點 **New query**（或「+」），出現空白編輯區。
+
+   ![Supabase 左側選單的 SQL Editor](images/supabase-sidebar-sql-editor.png)
+
+3. 點 **New query**（或「+」），出現空白編輯區。右上角綠色的 **Run** 就是等一下要按的按鈕。
+
+   ![SQL Editor 的空白編輯區與 Run 按鈕](images/supabase-sql-editor-new-query.png)
+
 4. 在編輯區按一下，**貼上**（Mac：⌘＋V；Windows：Ctrl＋V）。
 5. 按右下角綠色的 **Run**。
 6. 如果跳出提示說這段 SQL 有「破壞性操作」→ 按 **Run this query** 繼續（全新的專案，不會刪到東西）。
@@ -120,6 +139,7 @@ Supabase 是存放題目、學生名冊和作答紀錄的資料庫。
 ✅ **檢查點（不要截圖，回覆「好了」即可）**：記事本裡有一串 **`sb_secret_` 開頭** 的長字串。
 
 > ⚠️ 不要複製到 **Publishable key**（`sb_publishable_` 開頭），那不是我們要的。
+> ⚠️ **金鑰必須是完整的一整行**（`sb_secret_` 加上後面約 30 個字，中間沒有空格）。貼上後如果被切成兩行，要把中間的換行刪掉，接回一行；只貼到前半段或後半段，網站都會連不上。
 > ⚠️ Secret key 等同資料庫的萬用鑰匙：不要截圖、不要貼到 LINE 或任何聊天室（包含 AI 聊天）。
 
 ---

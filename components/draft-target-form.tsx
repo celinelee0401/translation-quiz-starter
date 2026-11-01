@@ -21,7 +21,7 @@ export function DraftTargetForm({ quizId, quizVersion, grade, mode = 'draft', ex
   async function save(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!classes.includes(classCode)) { setMessage('請選擇尚未安排的班級。'); return; }
-    if (mode === 'published' && !window.confirm(`確定將 ${classCode} 班加入已發布測驗？原有班級的時段與題目不會變更；新班級要到設定的開放時間才會在 Dashboard 顯示。`)) return;
+    if (mode === 'published' && !window.confirm(`確定將 ${classCode} 班加入已發布測驗？原有班級的時段與題目不會變更；新班級的學生要到設定的開放時間才能從作答連結進入。`)) return;
     setBusy(true);
     setMessage('');
     try {
@@ -33,7 +33,7 @@ export function DraftTargetForm({ quizId, quizVersion, grade, mode = 'draft', ex
       const body = await response.json() as { status?: string; error?: string };
       if (!response.ok || body.status !== 'ok') throw new Error(body.error || '時段未儲存。');
       setMessage(mode === 'published'
-        ? `${classCode} 班已加入；到開放時間才會在 Dashboard 顯示。`
+        ? `${classCode} 班已加入；到開放時間學生才能從作答連結進入。`
         : `${classCode} 的未公開時段已儲存；學生仍看不到。`);
       router.refresh();
     } catch (error) {

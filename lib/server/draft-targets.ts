@@ -43,7 +43,7 @@ export async function saveDraftTarget(
   const closesAt = taipeiTime(input.closesAtLocal);
   if (opensAt.getTime() < Date.now() + 120_000 || closesAt <= opensAt ||
     closesAt.getTime() - opensAt.getTime() > 90 * 86400_000) {
-    throw new DraftTargetError('請設定未來的開放時間，截止時間須較晚且相隔不超過 90 天。');
+    throw new DraftTargetError('請設定至少兩分鐘後的開放時間，截止時間須較晚且相隔不超過 90 天。');
   }
   const filter = `quiz_id=eq.${encodeURIComponent(input.quizId)}&quiz_version=eq.${input.quizVersion}`;
   const quizzes = await table<Array<{ status: string; grade_level: number }>>(

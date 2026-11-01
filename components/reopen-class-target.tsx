@@ -23,7 +23,7 @@ export function ReopenClassTarget({ quizId, quizVersion, classCode }: {
       });
       const body = await response.json() as { status?: string; error?: string };
       if (!response.ok || body.status !== 'ok') throw new Error(body.error || '補考時段未確認。');
-      setMessage(`${classCode} 班補考已排定；到開放時間才會在 Dashboard 顯示。`);
+      setMessage(`${classCode} 班補考已排定；到開放時間學生才能從作答連結進入。`);
       window.location.reload();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '補考時段未確認。');

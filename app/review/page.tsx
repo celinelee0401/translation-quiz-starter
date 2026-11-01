@@ -228,8 +228,8 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                       <li className="rounded-lg bg-emerald-50 p-3">
                         {step('1', 'AI 先批', setting.enabled && awaiting === 0)}
                         <p className="mt-1 text-muted-foreground">
-                          {setting.enabled ? `AI 自動採用開啟中（門檻 ${Math.round(setting.threshold * 100)}%）· 已由 AI 定稿 ${adopted} 題` : 'AI 自動採用已關閉，所有題目都要你逐題確認。'}
-                          {awaiting ? ` · 還有 ${awaiting} 題尚未經 AI 判讀` : ''}
+                          {setting.enabled ? `自動定稿開啟中（與參考答案相同的題目直接給分；有開 AI 時，信心達 ${Math.round(setting.threshold * 100)}% 也會採用）· 已自動定稿 ${adopted} 題` : '自動定稿已關閉，所有題目都要你逐題確認。'}
+                          {awaiting ? ` · 還有 ${awaiting} 題尚未判讀` : ''}
                         </p>
                         <div className="mt-2"><AiFirstPass quizId={first.quizId} version={first.version} enabled={setting.enabled}
                           threshold={setting.threshold} awaiting={awaiting} /></div>

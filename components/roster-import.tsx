@@ -1,10 +1,12 @@
 'use client';
 
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 
 type Row = { classCode: string; seatNumber: number; pin: string | null };
 
 export function RosterImport({ usesPin }: { usesPin: boolean }) {
+  const router = useRouter();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
@@ -25,6 +27,7 @@ export function RosterImport({ usesPin }: { usesPin: boolean }) {
       setText('');
       setIssued(usesPin ? body.rows : []);
       setMessage(`已匯入 ${body.rows.length} 位學生。${usesPin ? '下方 PIN 只顯示這一次，請先列印或複製。' : ''}`);
+      router.refresh();
     } catch (error) {
       setMessage(error instanceof Error ? error.message : '名冊匯入失敗。');
     } finally {

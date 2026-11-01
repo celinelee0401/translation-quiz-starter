@@ -9,6 +9,7 @@ void test('the bundled demo quiz passes the same checks as a teacher-created dra
   for (const draft of drafts) {
     const valid = validateNewDraft(draft);
     const total = valid.questions.reduce((sum, q) => sum + q.meaning + q.grammar + 1, 0);
-    assert.equal(total, 90);
+    // The semester importer only accepts quizzes worth exactly 100 points.
+    assert.equal(total, 100);
   }
 });

@@ -27,7 +27,7 @@ type View = 'current' | 'draft' | 'upcoming' | 'active' | 'ended' | 'archived' |
 const sampleId = 'G8-DEMO-SCHOOL-DAY-01';
 const views: Array<[View, string]> = [
   ['current', '待處理／進行中'], ['draft', '待發布草稿'], ['upcoming', '已發布 · 尚未開放'], ['active', '進行中'],
-  ['ended', '已結束'], ['archived', '已封存'], ['sample', '舊五題範例'], ['all', '全部未封存'],
+  ['ended', '已結束'], ['archived', '已封存'], ['sample', '內建示範題'], ['all', '全部未封存'],
 ];
 const phaseLabel = { upcoming: '尚未開放', active: '進行中', ended: '已截止' } as const;
 const phaseClass = { upcoming: 'bg-sky-100 text-sky-900', active: 'bg-emerald-100 text-emerald-900', ended: 'bg-amber-100 text-amber-900' } as const;
@@ -191,7 +191,7 @@ export function QuizStudio({ quizzes, overviewError, now: renderedAt, autoSettin
               <p className="mt-4 rounded-xl bg-muted p-4 text-sm">後端目前沒有測驗草稿。</p>
             ) : (
               <div className="mt-4 space-y-3">
-                <p className="text-sm text-muted-foreground">符合條件：{visibleQuizzes.length} 份。已封存與舊五題範例預設不顯示；可用上方分類找回。搜尋不分大小寫，「Unit 2」「第二課」都會找到 U2。</p>
+                <p className="text-sm text-muted-foreground">符合條件：{visibleQuizzes.length} 份。已封存與內建示範題預設不顯示；可用上方分類找回。搜尋不分大小寫，「Unit 2」「第二課」都會找到 U2。</p>
                 {visibleQuizzes.length === 0 ? (
                   <div className="rounded-lg bg-muted p-4 text-sm">
                     {otherMatches.length ? <>
@@ -357,7 +357,7 @@ export function QuizStudio({ quizzes, overviewError, now: renderedAt, autoSettin
                       <UnpublishQuiz quizId={quiz.quizId} quizVersion={quiz.version} title={quiz.title} /> : null}
                     {quiz.status === 'published' || quiz.status === 'closed' ?
                       <p className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-950">
-                        <b>AI 自動採用：{(autoSettings[`${quiz.quizId}:${quiz.version}`]?.enabled ?? true) ? '開啟中' : '已關閉'}</b>
+                        <b>自動定稿：{(autoSettings[`${quiz.quizId}:${quiz.version}`]?.enabled ?? true) ? '開啟中' : '已關閉'}</b>
                         <span>批改、AI 先批、抽查與匯出都在批改頁。</span>
                         <PageNavLink href="/review" className="font-black text-primary underline">到批改頁 →</PageNavLink>
                       </p> : null}

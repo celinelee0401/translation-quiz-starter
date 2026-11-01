@@ -257,7 +257,7 @@ export function StudentQuizPreview({
   async function handleLogin(event: { preventDefault(): void }) {
     event.preventDefault();
     if (!quizId) {
-      setMessage('尚未指定測驗，請從 Dashboard 的測驗入口進入。');
+      setMessage('尚未指定測驗，請使用老師給的作答連結進入。');
       return;
     }
     setBusy(true);
@@ -399,7 +399,7 @@ export function StudentQuizPreview({
   if (!quizId && !previewQuiz) {
     return <main className="mx-auto max-w-xl px-5 py-16 text-center">
       <h1 className="font-heading text-2xl font-black">目前沒有指定測驗</h1>
-      <p className="mt-4 leading-7">請從 Dashboard 的線上測驗入口進入；尚未發布的草稿無法作答。</p>
+      <p className="mt-4 leading-7">請使用老師給的作答連結進入；尚未發布的草稿無法作答。</p>
     </main>;
   }
 
@@ -450,7 +450,7 @@ export function StudentQuizPreview({
                     type="number"
                     inputMode="numeric"
                     min={1}
-                    max={30}
+                    max={99}
                     required
                     className="mt-2 h-11 w-full rounded-xl border border-input bg-background px-3 text-base"
                     placeholder="例如：12"
@@ -679,7 +679,7 @@ export function StudentQuizPreview({
             {(result?.status === 'released' || result?.status === 'provisional') ? <ol className="mt-6 space-y-4 text-left">
               {result.details?.map(item =>
                 <li key={item.questionKey} className="rounded-xl border border-border p-4 text-sm leading-6">
-                  <p className="font-black">{item.questionKey} · {item.prompt}（{item.scoreState === 'pending' ? '待教師覆核' : `${item.score}／${item.maxScore} 分${item.scoreState === 'suggested' ? '，暫估' : item.aiFinal ? '，AI 評分' : ''}`}）</p>
+                  <p className="font-black">{item.questionKey} · {item.prompt}（{item.scoreState === 'pending' ? '待教師覆核' : `${item.score}／${item.maxScore} 分${item.scoreState === 'suggested' ? '，暫估' : item.aiFinal ? '，系統評分' : ''}`}）</p>
                   <p className="mt-2 break-words">你的答案：{item.rawAnswer || '（空白）'}</p>
                   <p className="mt-2 break-words">參考答案：{item.textbookAnswer}</p>
                   {item.explanation ? <p className="mt-2 break-words">{item.scoreState === 'pending' ? '說明' : '回饋與句型重點'}：{item.explanation}</p> : null}
@@ -697,7 +697,7 @@ export function StudentQuizPreview({
                 </li>)}
             </ol> : !previewMode && quizId && result?.status !== 'expired' ? <a className="mt-5 inline-block font-bold text-primary underline" href={`/quiz?quiz=${encodeURIComponent(quizId)}&version=${quizVersion}`}>稍後重新登入查看測驗成果</a> : null}
             <p className="mt-7 text-sm font-bold">
-              {previewMode ? '可返回教師工作區查看其他測驗。' : '可返回 Dashboard 查看其他活動。'}
+              {previewMode ? '可返回教師工作區查看其他測驗。' : '可以關閉這個頁面了。'}
             </p>
             {!previewMode ? <button type="button" onClick={() => void logout()} disabled={busy}
               className="mt-3 min-h-11 rounded-lg bg-primary px-4 font-bold text-primary-foreground">完成並登出此裝置</button> : null}

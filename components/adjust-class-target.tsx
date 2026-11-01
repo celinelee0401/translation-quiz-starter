@@ -49,7 +49,7 @@ export function AdjustClassTarget({ quizId, quizVersion, classCode, phase, opens
       {phase === 'upcoming' ? (
         <button type="button" disabled={busy} className={`${button} bg-emerald-700 text-white`}
           onClick={() => send({ action: 'open-now' },
-            `確定現在就開放 ${classCode} 班？學生 Dashboard 會立刻出現這份測驗，截止時間不變。`,
+            `確定現在就開放 ${classCode} 班？學生會立刻可以從作答連結進入，截止時間不變。`,
             `${classCode} 班已開放。`)}>
           立即開放
         </button>
