@@ -358,7 +358,7 @@ export function QuizStudio({ quizzes, overviewError, now: renderedAt, autoSettin
                     {quiz.status === 'published' || quiz.status === 'closed' ?
                       <p className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-3 py-2 text-sm text-emerald-950">
                         <b>自動定稿：{(autoSettings[`${quiz.quizId}:${quiz.version}`]?.enabled ?? true) ? '開啟中' : '已關閉'}</b>
-                        <span>批改、AI 先批、抽查與匯出都在批改頁。</span>
+                        <span>批改、抽查與匯出都在批改頁。</span>
                         <PageNavLink href="/review" className="font-black text-primary underline">到批改頁 →</PageNavLink>
                       </p> : null}
                     {quiz.targets.length > 0 ?

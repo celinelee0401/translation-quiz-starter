@@ -659,7 +659,7 @@ export function StudentQuizPreview({
                 ? '這次沒有傳送答案，也不會產生真實成績。'
                 : result?.status === 'released'
                   ? result.aiScored
-                    ? `評分完成：${result.score}／${result.maxScore} 分。本次由 AI 評分，老師會抽查覆核；如對某題有疑義，可在下方送交老師評議。`
+                    ? `評分完成：${result.score}／${result.maxScore} 分。本次由系統自動評分，老師會抽查覆核；如對某題有疑義，可在下方送交老師評議。`
                     : `教師定稿：${result.score}／${result.maxScore} 分。`
                   : result?.status === 'provisional'
                     ? result.score === null

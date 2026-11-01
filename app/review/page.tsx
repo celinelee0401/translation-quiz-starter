@@ -12,6 +12,7 @@ import { AiFirstPass } from '@/components/ai-first-pass';
 import { CONFIDENCE_BUCKETS, loadCalibration, loadSpotCheck, summarizeCalibration, type CalibrationBucket, type SpotCheckItem } from '@/lib/server/calibration';
 import { classCodePattern } from '@/lib/public-quiz-data';
 import { getSchoolSettings } from '@/lib/school-settings';
+import { getAiConfig } from '@/lib/server/ai-provider';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,6 +30,8 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
   }
 
   const config = getDataConfig();
+  // Without an AI provider the system only finalizes answers that match the key.
+  const aiOn = getAiConfig() !== null;
   const query = await searchParams;
   const classFilter = classCodePattern.test(query.class ?? '') ? query.class! : '';
   const quizFilter = typeof query.quiz === 'string' && query.quiz.length < 130 ? query.quiz : '';
@@ -92,7 +95,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
         : !answer.rawAnswer.trim() ? { label: '空白答案', className: 'bg-slate-200 text-slate-800' }
           : answer.aiReview ? { label: `AI 信心不足（${Math.round(answer.aiReview.confidence * 100)}%）`, className: 'bg-amber-200 text-amber-950' }
             : answer.suggestion.suggestedScore !== null ? { label: '固定規則已建議分數', className: 'bg-sky-100 text-sky-900' }
-              : { label: 'AI 尚未判讀', className: 'bg-slate-200 text-slate-800' };
+              : { label: aiOn ? 'AI 尚未判讀' : '待老師判讀', className: 'bg-slate-200 text-slate-800' };
   const pendingAnswers = attempts.flatMap(attempt => attempt.answers).filter(answer => answer.finalScore === null || answer.openAppeal);
   const breakdown = {
     appeal: pendingAnswers.filter(answer => answer.openAppeal).length,
@@ -143,7 +146,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
               <p className="mt-3 text-sm text-muted-foreground">有學生評議的排在最前面，其餘依座號排列。{showAll ? '顯示這一班所有作答與題目。' : '每份只顯示還沒定稿的題目；按「確認並儲存」後，該題會從清單消失。'}
                 {(showAll ? current.attemptIds : current.pendingAttemptIds).length > 50 ? ' 本組超過 50 份，先顯示前 50 份，存完後重新整理會出現其餘作答。' : ''}</p>
             </section>
-            <BatchAiSuggestions answers={needsAi} />
+            {aiOn ? <BatchAiSuggestions answers={needsAi} /> : null}
             {shown.length === 0 ? <p className="surface-card">這一組沒有需要確認的題目。{nextGroup ? '可按上方「下一組待批改」繼續。' : '所有測驗都已批改完成。'}</p> : shown.map((attempt) => (
               <article key={attempt.id} className="surface-card">
                 <div className="flex flex-wrap items-start justify-between gap-3">
@@ -180,7 +183,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                         updatedAt={answer.updatedAt}
                         maxScore={answer.maxScore}
                         initialScore={answer.finalScore ?? answer.suggestion.suggestedScore ?? answer.aiReview?.suggestedScore ?? null}
-                        allowAi={answer.suggestion.suggestedScore === null && answer.finalScore === null && Boolean(answer.rawAnswer.trim())}
+                        allowAi={aiOn && answer.suggestion.suggestedScore === null && answer.finalScore === null && Boolean(answer.rawAnswer.trim())}
                         savedAi={answer.aiReview}
                       />
                       {answer.history.length ? (
@@ -205,7 +208,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
           <section id="answers" className="surface-card scroll-mt-20">
             <h1 className="font-heading text-2xl font-black">待批改總覽</h1>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              每份測驗照 ① AI 先批 → ② 你確認剩下的 → ③ 抽查 → ④ 匯出 的順序完成。完成的步驟會打勾。
+              每份測驗照 ① {aiOn ? 'AI 先批' : '系統先批（與參考答案相同的題目直接給分）'} → ② 你確認剩下的 → ③ 抽查 → ④ 匯出 的順序完成。完成的步驟會打勾。
             </p>
             <p className="mt-3 text-base font-black">{totalPending ? `全部測驗共有 ${totalPending} 題待你確認` : '目前沒有待確認的題目 ✓'}</p>
             {groups.length === 0 ? <p className="mt-4 rounded-lg bg-muted p-4 text-sm">目前還沒有學生交卷。</p> : null}
@@ -226,13 +229,13 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                     </h2>
                     <ol className="mt-3 space-y-4 text-sm">
                       <li className="rounded-lg bg-emerald-50 p-3">
-                        {step('1', 'AI 先批', setting.enabled && awaiting === 0)}
+                        {step('1', aiOn ? 'AI 先批' : '系統先批', setting.enabled && awaiting === 0)}
                         <p className="mt-1 text-muted-foreground">
-                          {setting.enabled ? `自動定稿開啟中（與參考答案相同的題目直接給分；有開 AI 時，信心達 ${Math.round(setting.threshold * 100)}% 也會採用）· 已自動定稿 ${adopted} 題` : '自動定稿已關閉，所有題目都要你逐題確認。'}
+                          {setting.enabled ? `自動定稿開啟中（與參考答案相同的題目直接給分${aiOn ? `；AI 信心達 ${Math.round(setting.threshold * 100)}% 也會採用` : ''}）· 已自動定稿 ${adopted} 題` : '自動定稿已關閉，所有題目都要你逐題確認。'}
                           {awaiting ? ` · 還有 ${awaiting} 題尚未判讀` : ''}
                         </p>
                         <div className="mt-2"><AiFirstPass quizId={first.quizId} version={first.version} enabled={setting.enabled}
-                          threshold={setting.threshold} awaiting={awaiting} /></div>
+                          threshold={setting.threshold} awaiting={awaiting} aiEnabled={aiOn} /></div>
                       </li>
                       <li className="rounded-lg bg-muted p-3">
                         {step('2', `你確認剩下的題目${pendingTotal ? `（共 ${pendingTotal} 題）` : ''}`, pendingTotal === 0)}
@@ -258,7 +261,7 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
                         </ul>
                       </li>
                       <li className="rounded-lg bg-muted p-3">
-                        {step('3', '抽查 AI 批得對不對', false)}
+                        {step('3', aiOn ? '抽查 AI 批得對不對' : '抽查自動定稿的題目', false)}
                         <div className="mt-2 flex flex-wrap gap-2">
                           <PageNavLink href={`/review?spot=${encodeURIComponent(first.quizId)}#tools`} className={chip(false)}>每班抽查 10 題</PageNavLink>
                           <PageNavLink href={`/review?calib=${encodeURIComponent(first.quizId)}#tools`} className={chip(false)}>校準報告</PageNavLink>
@@ -284,11 +287,12 @@ export default async function ReviewPage({ searchParams }: { searchParams: Promi
 
         {!error ? <div id="tools" className="scroll-mt-20 space-y-4">
           <details className="surface-card" open={Boolean(query.spot || query.calib)}>
-            <summary className="cursor-pointer text-xl font-black">AI 自動採用：抽查與校準</summary>
+            <summary className="cursor-pointer text-xl font-black">{aiOn ? 'AI 自動採用：抽查與校準' : '自動定稿：抽查'}</summary>
             <p className="mt-2 text-sm leading-6 text-muted-foreground">
-              自動定稿的題目不必逐題看；每班只抽信心最低的 10 題確認。校準報告顯示不同信心區間有多少題，以及你親自評分的題目中 AI 與你一致的比例，可用來調整門檻。
+              {aiOn ? '自動定稿的題目不必逐題看；每班只抽信心最低的 10 題確認。校準報告顯示不同信心區間有多少題，以及你親自評分的題目中 AI 與你一致的比例，可用來調整門檻。'
+                : '自動定稿的題目都和參考答案相同，不必逐題看；想確認時，每班可抽 10 題檢查。'}
             </p>
-            {autoQuizIds.length === 0 ? <p className="mt-3 rounded-lg bg-muted p-3 text-sm">目前沒有開啟 AI 自動採用的測驗。</p> : null}
+            {autoQuizIds.length === 0 ? <p className="mt-3 rounded-lg bg-muted p-3 text-sm">目前沒有開啟自動定稿的測驗。</p> : null}
               {quizzes.filter(quiz => autoQuizIds.includes(quiz.quizId)).map(quiz =>
                 <div key={`${quiz.quizId}:${quiz.version}`} className="mt-3 flex flex-wrap items-center gap-2">
                   <b className="mr-1">{quiz.title}</b>

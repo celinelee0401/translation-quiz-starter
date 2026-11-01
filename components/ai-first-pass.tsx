@@ -8,9 +8,10 @@ type Totals = { adopted: number; skipped: number; failed: number; processed: num
  * Step ①: turns automatic adoption on if needed, then lets the AI score every
  * submitted answer it has not seen yet. Answers it is unsure about stay for the teacher.
  */
-export function AiFirstPass({ quizId, version, enabled, threshold, awaiting }: {
-  quizId: string; version: number; enabled: boolean; threshold: number; awaiting: number;
+export function AiFirstPass({ quizId, version, enabled, threshold, awaiting, aiEnabled }: {
+  quizId: string; version: number; enabled: boolean; threshold: number; awaiting: number; aiEnabled: boolean;
 }) {
+  const who = aiEnabled ? 'AI' : '系統';
   const [level, setLevel] = useState(String(threshold));
   const [running, setRunning] = useState(false);
   const [message, setMessage] = useState('');
@@ -27,7 +28,7 @@ export function AiFirstPass({ quizId, version, enabled, threshold, awaiting }: {
 
   async function run() {
     setRunning(true);
-    setMessage('AI 批改中，請保持此頁開啟…');
+    setMessage(`${who}批改中，請保持此頁開啟…`);
     const sum: Totals = { adopted: 0, skipped: 0, failed: 0, processed: 0 };
     const errors = new Set<string>();
     try {
@@ -49,11 +50,11 @@ export function AiFirstPass({ quizId, version, enabled, threshold, awaiting }: {
         after = body.next ?? after;
       }
       if (errors.size) {
-        setMessage(`AI 批改完成，但有提醒：${[...errors].join('；')}。已定稿 ${sum.adopted} 題，其餘保留。`);
+        setMessage(`${who}批改完成，但有提醒：${[...errors].join('；')}。已定稿 ${sum.adopted} 題，其餘保留。`);
         setRunning(false);
         return;
       }
-      setMessage(`完成：AI 定稿 ${sum.adopted} 題，留給你 ${sum.skipped} 題。正在更新畫面…`);
+      setMessage(`完成：${who}定稿 ${sum.adopted} 題，留給你 ${sum.skipped} 題。正在更新畫面…`);
       window.location.reload();
     } catch (error) {
       setMessage(`${error instanceof Error ? error.message : 'AI 批改中斷。'} 已定稿的題目不受影響，可再按一次繼續。`);
@@ -72,22 +73,22 @@ export function AiFirstPass({ quizId, version, enabled, threshold, awaiting }: {
     <div className="flex flex-wrap items-center gap-2">
       {awaiting > 0 || !enabled ? <button type="button" onClick={() => void run()} disabled={running}
         className="min-h-11 rounded-lg bg-emerald-800 px-4 font-black text-white disabled:opacity-50">
-        {running ? `AI 批改中（已檢查 ${totals?.processed ?? 0} 份）` : enabled ? `AI 先批（${awaiting} 題未判讀）` : '開啟並由 AI 先批'}
-      </button> : <span className="font-black text-emerald-800">AI 已批完 ✓</span>}
+        {running ? `${who}批改中（已檢查 ${totals?.processed ?? 0} 份）` : enabled ? `${who}先批（${awaiting} 題未判讀）` : `開啟並由${who}先批`}
+      </button> : <span className="font-black text-emerald-800">{who}已批完 ✓</span>}
       <details className="inline-block">
         <summary className="cursor-pointer px-2 text-muted-foreground underline">設定</summary>
         <div className="mt-2 flex flex-wrap items-end gap-2 rounded-lg border border-border bg-white p-3">
-          <label className="font-bold">AI 信心門檻
+          {aiEnabled ? <label className="font-bold">AI 信心門檻
             <select value={level} onChange={event => setLevel(event.target.value)} disabled={running}
               className="mt-1 block min-h-11 rounded-lg border border-border bg-white px-2">
               {['0.8', '0.85', '0.9', '0.95'].map(value => <option key={value} value={value}>{Math.round(Number(value) * 100)}%</option>)}
             </select>
-          </label>
+          </label> : null}
           <button type="button" onClick={() => void run()} disabled={running}
-            className="min-h-11 rounded-lg border border-emerald-800 px-3 font-bold">套用門檻並重新處理</button>
+            className="min-h-11 rounded-lg border border-emerald-800 px-3 font-bold">{aiEnabled ? '套用門檻並重新處理' : '重新處理'}</button>
           {enabled ? <button type="button" onClick={() => void switchOff()} disabled={running}
-            className="min-h-11 rounded-lg border border-border px-3 font-bold">關閉 AI 自動採用</button> : null}
-          <p className="w-full text-xs leading-5 text-muted-foreground">信心達門檻的題目自動定稿；低於門檻、學生評議、空白答案留給你。</p>
+            className="min-h-11 rounded-lg border border-border px-3 font-bold">關閉自動定稿</button> : null}
+          <p className="w-full text-xs leading-5 text-muted-foreground">{aiEnabled ? '與參考答案相同、或 AI 信心達門檻的題目自動定稿；其餘、學生評議、空白答案留給你。' : '與參考答案相同的題目自動定稿；其餘、學生評議、空白答案留給你。'}</p>
         </div>
       </details>
     </div>
